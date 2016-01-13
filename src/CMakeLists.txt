@@ -1,0 +1,75 @@
+SET(GLOBAL_HEADERS
+  macros.h
+  log.h
+)
+SET(GLOBAL_SOURCES
+  macros.cpp
+  log.cpp
+)
+
+SET(UTILS_HEADERS
+  utils/utils.h
+  utils/time_utils.h
+)
+
+SET(UTILS_SOURCES
+  utils/utils.cpp
+  utils/time_utils.cpp
+)
+
+SET(MEDIA_HEADERS
+  media/nal_units.h
+  media/media_stream_output.h
+  media/ffmpeg_utils.h
+  media/codec_holder.h
+  media/resampler.h
+)
+SET(MEDIA_SOURCES
+  media/nal_units.cpp
+  media/media_stream_output.cpp
+  media/ffmpeg_utils.cpp
+  media/codec_holder.cpp
+  media/resampler.cpp
+)
+
+IF(APPLE)
+  SET(PLATFORM_HEADER)
+  SET(PLATFORM_SOURCES)
+  SET(PLATFORM_LIBRARIES)
+ELSEIF(UNIX)
+  SET(PLATFORM_HEADER)
+  SET(PLATFORM_SOURCES)
+  SET(PLATFORM_LIBRARIES rt z)
+ENDIF(APPLE)
+
+FIND_PACKAGE(FFmpeg REQUIRED)
+FIND_PACKAGE(OpenCV REQUIRED)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${OpenCV_INDLUDE_DIRS})
+
+ADD_EXECUTABLE(${PROJECT_NAME}
+  ${GLOBAL_HEADERS} ${GLOBAL_SOURCES}
+  ${UTILS_HEADERS} ${UTILS_SOURCES}
+  ${PLATFORM_HEADER} ${PLATFORM_SOURCES}
+  ${MEDIA_HEADERS} ${MEDIA_SOURCES}
+  main.cpp
+)
+IF(WITH_OPUS)
+  FIND_PACKAGE(Opus REQUIRED)
+  SET(DEPENDENCIES_LIBRARIES opus)
+  SET(DEPENDENCIES_SOURCES)
+ELSE()
+  SET(DEPENDENCIES_SOURCES)
+ENDIF(WITH_OPUS)
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}
+  ${DEPENDENCIES_LIBRARIES}
+  ${PLATFORM_LIBRARIES}
+  ${FFMPEG_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+  swresample
+)
+
+IF(DEVELOPER_ENABLE_TESTS)
+  ENABLE_TESTING()
+  ADD_DEFINITIONS(-DTEST_FOLDER_PATH="${CMAKE_SOURCE_DIR}/tests/")
+ENDIF(DEVELOPER_ENABLE_TESTS)
