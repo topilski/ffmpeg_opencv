@@ -103,29 +103,6 @@ own_nal_unit_t *alloc_own_nal_unit_from_string(const uint8_t *data, uint32_t * l
   return h;
 }
 
-#if defined(PROTOBUF_ENABLED)
-own_nal_unit_t *alloc_own_nal_unit_from_proto(Media__VideoPacket__FormatDescription *format) {
-  own_nal_unit_t *h = f_calloc(1, sizeof(own_nal_unit_t));
-  h->frametype = OWN_NAL_UNIT_TYPE;
-  h->total_size = format->totalsize;
-  h->parametr_count = format->n_entry;
-  if (h->parametr_count > 0) {
-    h->parametrs = calloc(h->parametr_count, sizeof(len_value_t));
-    int i;
-    for (i = 0; i < h->parametr_count; ++i) {
-      struct len_value_t* cur = &h->parametrs[i];
-      cur->len = format->entry[i].len;
-      DCHECK_LE(cur->len, 16);
-      memcpy(cur->value, format->entry[i].data, format->entry[i].len);
-      }
-  } else {
-      debug_msg("Warning not found parameters in nal unit buffer.");
-  }
-
-  return h;
-}
-#endif
-
 void free_own_nal_unit(own_nal_unit_t * nal_unit) {
   if (!nal_unit) {
     debug_perror("free_own_nal_unit", EINVAL);

@@ -88,9 +88,6 @@ typedef struct header_enc_frame_t {
 int find_nal_unit(uint8_t* buf, int size, int* nal_start, int* nal_end, uint8_t* nal_type);
 
 own_nal_unit_t * alloc_own_nal_unit_from_string(const uint8_t* data, uint32_t * len);
-#if defined(PROTOBUF_ENABLED)
-own_nal_unit_t * alloc_own_nal_unit_from_proto(Media__VideoPacket__FormatDescription *format);
-#endif
 void free_own_nal_unit(own_nal_unit_t * nal_unit);
 
 uint8_t* create_sps_nal_unit(len_value_t* raw_sps, uint32_t * len);

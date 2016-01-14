@@ -3,9 +3,8 @@
 #pragma once
 
 #include "macros.h"
-#if defined(PROTOBUF_ENABLED)
-#include "spec/media.pb-c.h"
-#endif
+
+#include <opencv2/opencv.hpp>
 
 #define DUMP_MEDIA 0
 
@@ -29,6 +28,8 @@ typedef struct media_stream_params_t {
   uint32_t audio_channels_out;
   uint32_t audio_sample_rate_out;
   uint32_t audio_bit_rate_out;
+
+  bool need_encode;
 } media_stream_params_t;
 
 typedef struct media_stream_t {
@@ -50,23 +51,15 @@ typedef struct media_stream_t {
   FILE * media_dump;
   FILE * only_mkf;
 #endif
-#ifdef WITH_OPUS
-  struct resampler_t * resampler;
-  uint8_t **dst_data;
-  uint8_t *audio_pcm_buff;
-  int audio_buf_pcm_cur_size;
-#endif
+
+  media_stream_params_t params;
 } media_stream_t;
 
 media_stream_t* alloc_video_stream(const char * path_to_save,
                                    media_stream_params_t * params);  // h264, aac
 const char * get_media_stream_file_path(media_stream_t* stream);
-int write_video_frame_to_media_stream(media_stream_t * stream, uint8_t *data, int size, int mkf);
-#if defined(PROTOBUF_ENABLED)
-int write_proto_video_frame_to_media_stream(media_stream_t* stream,
-                                            Media__VideoPacket* video_packet);
-#endif
-int write_audio_frame_to_media_stream(media_stream_t * stream, uint8_t *data, int size);
+int write_video_frame_to_media_stream(media_stream_t * stream, const cv::Mat *mat);
+int write_audio_frame_to_media_stream(media_stream_t * stream, uint8_t *data, size_t size);
 void free_video_stream(media_stream_t * stream);
 
 }  // namespace media
